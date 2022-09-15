@@ -1,26 +1,17 @@
-import formidable from 'formidable';
-export default defineEventHandler( async (event) => {
-    var form = new formidable.IncomingForm({
-        multiples: true
-    });
-    return form.parse(event.req, async function (err, fields, files) {
-        var params = {
-            JobDescriptionId: fields.jobId || -1,
-            FirstName: fields.firstName,
-            LastName: fields.lastName,
-            Email: fields.email,
-            PhoneNumber: fields.phone,
-            CallingCode: fields.countryCode,
-            LinkedIn: fields.linkedIn,
-            Message: fields.message || '',
-            CoverLetterFileName: '',
-            CoverLetterFile : '',
-            ResumeFileName : '',
-            ResumeFile : '', 
-        };
-        //Do not working...
-        console.log(params.FirstName);
+import formidable from "formidable";
 
-        return {};
+export default defineEventHandler(async (event) => {
+  var form = new formidable.IncomingForm({
+    multiples: true,
+  });
+  return await new Promise((resolve, rej) => {
+    form.parse(event.req, async (err, fields, files) => {
+      if (err) {
+        console.log(String(err));
+        rej({ e: String(err) });
+      }
+      console.log({ fields, files });
+      resolve({ fields, files });
     });
-})
+  });
+});
