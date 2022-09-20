@@ -53,7 +53,7 @@ const props = defineProps({
     },
   },
   detailJob: {
-    type: Object,
+    type: Boolean,
     default: () => false,
   },
 });

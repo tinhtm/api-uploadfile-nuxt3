@@ -83,7 +83,7 @@
     });
     const props = defineProps({
         hideDisclaimers: {
-          type: Object,
+          type: Boolean,
           default: () => false
         }
     })
