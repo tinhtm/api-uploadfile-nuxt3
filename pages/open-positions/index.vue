@@ -26,6 +26,13 @@ const showHideComponent = (name) => {
   }
   return false
 }
+const { $initXdnRum } = useNuxtApp();
+  onMounted(() => {
+    if(process.client) {
+      $initXdnRum('/open-positions','open-positions')
+    }
+  });
+
 </script>
 <template>
   <header-block />

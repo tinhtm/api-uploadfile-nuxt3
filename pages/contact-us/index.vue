@@ -25,6 +25,13 @@ const showHideComponent = (name) => {
   }
   return false
 }
+
+const { $initXdnRum } = useNuxtApp();
+  onMounted(() => {
+    if(process.client) {
+      $initXdnRum('/contact-us','contact-us')
+    }
+  });
 </script>
 <template>
   <header-block />

@@ -16,7 +16,7 @@
             }
         },
         detailJob: {
-            type: Boolean,
+            type: Object,
             default: () => false
         }
     })

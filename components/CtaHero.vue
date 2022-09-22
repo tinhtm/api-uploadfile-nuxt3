@@ -32,11 +32,10 @@
             }
         },
         detailJob: {
-            type: Boolean,
+            type: Object,
             default: () => false
         }
-    })
-    
+    })    
 </script>
 <template>
     <section class="cta-hero__container">
@@ -56,13 +55,14 @@
                 {{data.description}}
             </p>
             <p v-if="detailJob" class="cta-hero__time">Last update: {{$dayjs(data.updatedOn).format('MMMM DD, YYYY')}}</p>
-            <button class="cta-hero__btn rippleAffect" @click="$redirect(data.link.url)">
+            <div class="flex items-center my-[30px] xsm:my-10 pb-7">
+                <button class="cta-hero__btn rippleAffect h-[48px]" @click="$redirect(data.link.url)">
                 {{data.link.text}}
             </button>
-            <span class="ml-5 text-neutrals text-[14px] "> {{data.link.description}}</span>
-           
-        </div>
+            <p class="ml-5 text-neutrals text-[14px] "> {{data.link.description}}</p>
+            </div>
 
+           
         <div class="__positions__container">
             <div v-if="detailJob" class="down-arrow">
                 <button @click="$scroll('#detail-job')" class="w-[44px] h-[44px] flex flex-col justify-center items-center cursor-pointer">
@@ -97,25 +97,28 @@
                 </button>
             </div>
         </div>
+        </div>
+
     </section>
 </template>
 
 <style lang="scss" scoped>
 .cta-hero__container {
-    @apply relative;
-    height: calc(100vh - 80px);
+
 }
 .cta-hero__box {
-    padding-top: calc((100vh - 385px) / 2);
+    @apply flex flex-col justify-center;
+    height: calc(100vh - 122px);
+
 }
 .cta-hero__title {
     @apply text-neutrals mb-5 font-black xsm:text-5xl;
 }
 .cta-hero__description {
-    @apply text-neutrals-80 text-xl mb-[30px];
+    @apply text-neutrals-80 text-xl pb-5;
 }
 .cta-hero__btn {
-    @apply px-5 leading-[48px] bg-navigation rounded-full opacity-[1] font-bold text-neutrals-5 mt-[30px] xsm:mt-10 hover:bg-[#33A7B9];
+    @apply px-5 leading-[48px] bg-navigation rounded-full opacity-[1] font-bold text-neutrals-5 hover:bg-[#33A7B9];
     box-shadow: 0px 1px 2px #00000029;
 }
 .cta-hero__time {
@@ -167,8 +170,7 @@ a {
     @apply flex pt-5;
 }
 .down-arrow {
-    @apply flex flex-col justify-center items-center absolute text-neutrals cursor-pointer bottom-[10px];
-    left: 46%;
+    @apply flex flex-col justify-center items-center text-neutrals cursor-pointer absolute bottom-0 left-1/2;
     img {
         @apply mr-0;
     }

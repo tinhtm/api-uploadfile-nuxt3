@@ -43,7 +43,7 @@ export default defineEventHandler(() => {
                 "preloadText": ""
               },
               {
-                "type": "email",
+                "type": "text",
                 "property": "email",
                 "label": "Email address",
                 "caption": "",

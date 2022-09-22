@@ -2,7 +2,6 @@
 const route = useRoute();
 const { data } = await useAsyncData(`job-detail-${route.params.slug}`, () => $fetch(`/api/structures/job-detail/${route.params.slug}`));
 const sections = [...data.value.sections];
-console.log(sections);
 const listComponent = reactive([
   {component: shallowRef(resolveComponent("HeaderBlock")), name: resolveComponent("HeaderBlock").__name, enable: false},
   {component: shallowRef(resolveComponent("FooterBlock")), name: resolveComponent("FooterBlock").__name, enable: false},
@@ -28,6 +27,12 @@ const showHideComponent = (name) => {
   }
   return false
 }
+const { $initXdnRum } = useNuxtApp();
+onMounted(() => {
+  if(process.client) {
+    $initXdnRum(`/open-positions/${route.params.slug}`,`${route.params.slug}-detail`)
+  }
+});
 </script>
 <template>
   <header-block />

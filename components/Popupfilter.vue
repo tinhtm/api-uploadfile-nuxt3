@@ -41,8 +41,8 @@ var demo = [];
 
     function filterData(){
         emits('update-change', selectedIds);
-        isShowpopup.value = !isShowpopup.value;
         demo = [...selectedIds];
+        redirect();
     }
 
     function clearChecbox(){
@@ -54,7 +54,7 @@ var demo = [];
         demo = [];
         selectedIds = [];
         emits('update-change', demo )
-        isShowpopup.value = !isShowpopup.value;
+        redirect();
     }
 
     function showPopup() {
@@ -67,7 +67,7 @@ var demo = [];
             })
         })
     })
-    isShowpopup.value = !isShowpopup.value;
+    redirect();
 }
     function closePopup() {
     selectedIds = [...demo];
@@ -91,14 +91,14 @@ var demo = [];
         }))
     });
 
-
-
-
+    const redirect = () => {
+        setTimeout(() =>   isShowpopup.value = !isShowpopup.value, 300);
+    }
 </script>
 
 <template>
     <div class="block xsm:hidden">
-        <button class="filters flex" id="filters" @click="showPopup">
+        <button class="filters flex rippleAffect" id="filters" @click="showPopup">
             <span class="text-[16px] font-bold text-neutral pr-[5px]">
                 Filters
             </span><img src="https://drberg-dam.imgix.net/icons/icon-line-filter.svg " alt="Filters"
@@ -128,7 +128,7 @@ var demo = [];
                                         :key="`${variant.id}_${variant.name}`">
                                         <input @change="changeValue(variant, item)" v-model="variant.value" type="checkbox"
                                             :id="variant.name">
-                                        <label :for="variant.name">{{ variant.name }} {{variant.value}}</label>
+                                        <label :for="variant.name">{{ variant.name }}</label>
                                     </section>
                                 </div>
 
@@ -138,8 +138,8 @@ var demo = [];
                     </div>
                 </div>
                 <div>
-                        <button class="btn-filter apply-filter" @click="filterData">Apply</button>
-                        <button class="btn-filter clear-filter" @click="clearChecbox">Clear all filters</button>
+                        <button class="btn-filter apply-filter rippleAffect" @click="filterData">Apply</button>
+                        <button class="btn-filter clear-filter rippleAffect" @click="clearChecbox">Clear all filters</button>
                  </div>
             </div>
         </transition>
@@ -157,7 +157,7 @@ var demo = [];
 
 }
 .filters{
-    @apply px-4 py-2 ml-5 bg-neutrals-10 rounded-full;
+    @apply mb-4 px-4 py-2 ml-5 bg-neutrals-10 rounded-full;
 }
 .filters-block-container{
     height: calc(100vh - 250px);
@@ -199,18 +199,35 @@ var demo = [];
 		@apply text-navigation bg-neutrals-5 border-navigation;
 		}
 }
-.slide-fade-enter-active {
-    transition: all .3s cubic-bezier(1.0, 0.5, 0.8, 1.0);
+.rippleAffect {
+    background-position: center;
+    transition: background 0.5s;
+    border-radius: 125px;
 }
-.slide-fade-leave-active {
-    transition: all .3s cubic-bezier(1.0, 0.5, 0.8, 1.0);
+.rippleAffect:hover {
+    background: #33a7b9
+    radial-gradient(circle, transparent 1%, #0091a8 1%)
+        center/15000%;
+        color: white;
 }
-.slide-fade-enter,.slide-fade-leave-to
-{
-    transform: translateX(10px);
-    opacity: 0;
+.rippleAffect:active {
+    background-color: rgba(255, 255, 255, 0.7);
+    background-size: 100%;
+    transition: background 0s;
 }
 
+.slide-fade-enter-active {
+  transition: all 0.3s ease-out;
+}
+
+.slide-fade-leave-active {
+  transition: all 0.3s cubic-bezier(1, 0.5, 0.8, 1);
+}
+.slide-fade-enter-from,
+.slide-fade-leave-to {
+  transform: translateX(-60px);
+  opacity: 0;
+}
 .st0{fill:#2A363E;}
 </style>
 

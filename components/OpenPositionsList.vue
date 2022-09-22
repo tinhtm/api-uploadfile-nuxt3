@@ -1,5 +1,4 @@
 <script setup name="OpenPositionList">
-import { list } from "postcss";
 import FilterBlock from "./FilterBlock.vue"
 import PopupFilterBlock from "./Popupfilter.vue"
 const props = defineProps({
@@ -127,7 +126,7 @@ useFetch("/api/position-attributes", { server: false }).then((res) => {
 </script>
 <template>
 <client-only>
-  <div class="open-positions-list__container">
+  <div id="open-positions-list" class="open-positions-list__container">
     <div class="open-positions-list_header__box">
       <h2 class="header__box__title">{{ initData.title }}</h2>
       <NuxtLink class="hidden xsm:block "

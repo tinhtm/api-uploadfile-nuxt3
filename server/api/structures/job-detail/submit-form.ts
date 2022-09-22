@@ -1,4 +1,5 @@
 export default defineEventHandler(async (event) => {
+    const body = await useBody(event);
     var data = {
         "type": "page",
         "name": "Specific Job Application",
@@ -44,7 +45,7 @@ export default defineEventHandler(async (event) => {
                             "preloadText": ""
                         },
                         {
-                            "type": "email",
+                            "type": "text",
                             "property": "email",
                             "label": "Email address",
                             "caption": "",
@@ -98,5 +99,12 @@ export default defineEventHandler(async (event) => {
         "lastUpdated": "2022-07-24T23:33:06.950Z",
         "lastUpdatedBy": "Mickey Mouse"
     }
-    return data;
+    return await fetch('https://drbergstorage.blob.core.windows.net/careersite/jobs.json').then(async res => {
+        return await res.json().then((response) => {
+          var job = response.find(c => c.slug == body.slug);
+            data.sections[0].fields.title =  job.title;
+            data.sections[0].fields.summary = job.summary;
+          return data;
+        })
+      })
 })

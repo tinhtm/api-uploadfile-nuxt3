@@ -72,9 +72,11 @@ export default defineEventHandler(async (event) => {
     return await res.json().then((response) => {
       var job = response.find(c => c.slug == event.context.params.slug);
       data.sections[0].fields.title = job.title;
-      data.sections[0].fields.summary = job.summary;
-      data.sections[0].fields.updatedOn = job.updatedOn;
+      data.sections[0].fields.summary = job.summary;   
+      data.sections[0].fields.updatedOn = job.date_updated;
       data.sections[1].fields.description = job.description;
+      data.sections[0].fields.link.url = `/open-positions/${job.slug}/submit-form`;
+      data.sections[1].fields.ctaLink.url = `/open-positions/${job.slug}/submit-form`;
       return data;
     })
   })

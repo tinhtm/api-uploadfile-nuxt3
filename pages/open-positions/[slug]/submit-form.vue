@@ -1,6 +1,9 @@
 <script setup>
 const route = useRoute();
-const { data } = await useAsyncData("submit-form", () => $fetch(`/api/structures/job-detail/submit-form`));
+const { data } = await useAsyncData(`submit-form-${route.params.slug}`, () => $fetch(`/api/structures/job-detail/submit-form`,{
+  method: "post",
+  body: {slug: route.params.slug}
+}));
 const sections = [...data.value.sections];
 const listComponent = reactive([
   {component: shallowRef(resolveComponent("HeaderBlock")), name: resolveComponent("HeaderBlock").__name, enable: false},
@@ -26,6 +29,12 @@ const showHideComponent = (name) => {
   }
   return false
 }
+const { $initXdnRum } = useNuxtApp();
+  onMounted(() => {
+    if(process.client) {
+      $initXdnRum(`/open-positions/${route.params.slug}/submit-form`,`${route.params.slug}-submit-form`)
+    }
+  });
 </script>
 <template>
   <header-block />

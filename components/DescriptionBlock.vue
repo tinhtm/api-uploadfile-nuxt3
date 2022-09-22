@@ -17,7 +17,7 @@
    })
 </script>
  <template>
-    <div class="description-block">
+    <div class="description-block mt-7">
         <div class="body" id="detail-job" v-html="data.description"></div>
         <div>
             <p v-if="data.ctaLink.showLink" class="join-team-btn">

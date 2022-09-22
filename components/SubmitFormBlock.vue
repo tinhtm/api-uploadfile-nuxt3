@@ -1,7 +1,5 @@
 <script setup name="SubmitFormBlock">
 import countryCode from "assets/data/country.json";
-import { object, string, number } from 'yup';
-import { configure } from "vee-validate";
 const { $extenstionName, $converMB } = useNuxtApp();
 const listCountry = await [
 		...countryCode.listData.map((item) => {
@@ -53,7 +51,7 @@ const props = defineProps({
     },
   },
   detailJob: {
-    type: Boolean,
+    type: Object,
     default: () => false,
   },
 });
@@ -67,13 +65,45 @@ const formData = reactive({
   attachmentResume: [],
   attachmentLetter: [],
 });
-const schema = object({
-  firstName: string().required("First Name is required").matches(/^[a-zA-Z\s]*$/, "First Name must only contain letters and space").max(50, "The First Name field may not be greater than 50 characters"),
-  lastName: string().required("Last Name is required").matches(/^[a-zA-Z\s]*$/, "Last Name must only contain letters and space").max(50, "The Last Name field may not be greater than 50 characters"),
-  phone: string().required("Phone is required"),
-  message: string().required("The Message is required").max(50, "The Message field may not be greater than 50 character"),
-  email: string().required("Email is required").matches(/^[a-zA-Z\d\-_@.\s]+$/i, "Email must contain alphanumeric characters only (no spaces, no special characters except _ and .").email("Invalid email address format"),
+const schema = ({
+  firstName(value){ 
+    if (!value.trim() || !value.length) return "First Name is required";
+    else if (!/^[a-zA-Z\s]*$/.test(value)) return "First Name must only contain letters and space";
+    else if(value.trim().length > 50) return "The First Name field may not be greater than 50 characters";
+    return true;
+  },
+  lastName(value){ 
+    if (!value.trim() || !value.length) return "Last Name is required";
+    else if (!/^[a-zA-Z\s]*$/.test(value)) return "Last Name must only contain letters and space";
+    else if(value.trim().length > 50) return "The Last Name field may not be greater than 50 characters";
+    return true;
+  },
+  phone(value){ 
+    if (!value || !value.length) return "Phone is required";
+    return true;
+  },
+  message(value){ 
+    if(value == null){
+      return true;
+    }
+    else if (!value || !value.trim() || !value.length) return "The Message is required";
+    else if(value.trim().length > 50) return "The Message field may not be greater than 50 character";
+    return true;
+  },
+  email(value){ 
+    if (!value.trim() || !value.length) return "Email is required";
+    else if (!/^[a-zA-Z\d\-_@.\s]+$/i.test(value)) return "Email must contain alphanumeric characters only (no spaces, no special characters except _ and .";
+    else if(!/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z0-9]/.test(value)) return "Invalid email address format";
+    return true;
+  }
 });
+// const schema = object({
+//   firstName: string().required("First Name is required").matches(/^[a-zA-Z\s]*$/, "First Name must only contain letters and space").max(50, "The First Name field may not be greater than 50 characters"),
+//   lastName: string().required("Last Name is required").matches(/^[a-zA-Z\s]*$/, "Last Name must only contain letters and space").max(50, "The Last Name field may not be greater than 50 characters"),
+//   phone: string().required("Phone is required"),
+//   message: string().required("The Message is required").max(50, "The Message field may not be greater than 50 character"),
+//   email: string().required("Email is required").matches(/^[a-zA-Z\d\-_@.\s]+$/i, "Email must contain alphanumeric characters only (no spaces, no special characters except _ and .").email("Invalid email address format"),
+// });
 const changeInput = (e, item) => {
   formData[item.property] = e.target.value;
   if(e.target.value.length > 0){
@@ -111,8 +141,10 @@ const selectCountry = (itemCountry) => {
 }
 const limitSize = 20971520; // < 20MB
 const limitExtention = ["doc", "docx", "pages", "pdf"];
+const resumeFirstLoad = ref(true); 
+const letterFirstLoad = ref(true); 
 const selectFile = (event, type) => {
-  let totalSize = 0;
+  // let totalSize = 0;
   let file = event.target.files[0];
   if(!limitExtention.some(c => c == $extenstionName(file.name))) {
     event.target.value = null;
@@ -123,24 +155,31 @@ const selectFile = (event, type) => {
   
   if(type == "letter") {
     letterFirstLoad.value = false;
-    formData.attachmentLetter.forEach(c => {
-      totalSize += c.size;
-    })
-    totalSize += file.size;
-    if(totalSize <= limitSize) {
-      formData.attachmentLetter.push(file);
+    // formData.attachmentLetter.forEach(c => {
+    //   totalSize += c.size;
+    // })
+    // totalSize += file.size;
+    if(file.size <= limitSize) {
+      if(formData.attachmentLetter.length >= 1){
+        formData.attachmentLetter.shift();
+      }
+        formData.attachmentLetter.push(file);       
     }
   }
   if(type == "resume"){
     resumeFirstLoad.value = false;
-    formData.attachmentResume.forEach(c => {
-      totalSize += c.size;
-    })
-    totalSize += file.size;
-    if(totalSize <= limitSize) {
-      formData.attachmentResume.push(file);
+    // formData.attachmentResume.forEach(c => {
+    //   totalSize += c.size;
+    // })
+    // totalSize += file.size;
+    if(file.size <= limitSize) {
+      if(formData.attachmentResume.length >= 1){
+        formData.attachmentResume.shift();
+      }
+        formData.attachmentResume.push(file);      
     }
   }
+
   event.target.value = null;
   return
 }
@@ -180,23 +219,28 @@ const submitForm = (valid ,url) => {
         body: form,
         method: 'POST'
       })
+      return navigateTo({ path: url })
     }
+    
   })
 }
 const searchCountry = ref("");
 const filterCountry = ref(listCountry);
-const showremoveIcon =ref(false);
+const showremoveIcon = ref(false);
+const notFound_case =  ref(false);
 const search = () => {
   if (!searchCountry.value || searchCountry.value.trim() == "") {
     filterCountry.value = [...listCountry];
     showremoveIcon.value = false;
   }
   else {
+    showremoveIcon.value = true;
     filterCountry.value = listCountry.filter(
       c => [c.id, c.code, c.nameCode, c.countryCodeNumber].some(
         i => `${i}`.toLowerCase().includes(searchCountry.value.toLowerCase())
       )
     )
+    filterCountry.value == ''? notFound_case.value = true : notFound_case.value = false;   
   }
 }
 onMounted(()=>{
@@ -210,9 +254,28 @@ const handleRemove = (e,item) =>{
     formData[item.property] = "";
      document.getElementById(`${item.property}`).value = formData[item.property];
 }
+const completedLoadFiles = () => {
+  resumeFirstLoad.value = false; 
+  letterFirstLoad.value = false; 
+}
+
+function remove_search(){
+  searchCountry.value = "";
+  notFound_case.value = false;
+  filterCountry.value = [...listCountry];
+}
+function blurInput(e,item){
+  formData[item.property] = e.target.value.replace(/\s\s+/g, ' ').replace(/^\s+|\s+$/g, '');
+}
+function checkNumber(event){
+  let keyCode = event.keyCode;
+      if (keyCode < 48 || keyCode > 57) {
+        event.preventDefault();
+      }
+}
 </script>
 <template>
-  <v-form class="submit-form-block" :validation-schema="schema"  v-slot="{ meta: formMeta, validate, errors }">
+  <v-form class="submit-form-block" :validation-schema="schema"  v-slot="{ meta: formMeta, validate, errors, handleSubmit }">
     <div
       v-if="data.parentPageLink && data.parentPageLink.showLink"
       class="header backArrow_box"
@@ -259,11 +322,12 @@ const handleRemove = (e,item) =>{
                   <section class="control-input-search">
                     <img width="20" height="20" class="w-[20px] h-[20px]" src="https://drberg-dam.imgix.net/icons/icon-line-general-search.svg" loading="lazy" alt="search-icon">
                     <input type="text" class="" placeholder="Search" v-model="searchCountry" @input="search">
-                    <button v-if="showremoveIcon" class="absolute right-6" @click.prevent="searchCountry = '';search();">
-                      <img class="w-[24px] h-[24px]" src="https://drberg-dam.imgix.net/icons/icon-line-navigation-close.svg" loading="lazy" alt="close-icon">
+                    <button v-if="showremoveIcon" class="absolute right-6 remove_icon" @click.prevent="remove_search">
+                      <img class="w-[20px] h-[20px]" src="https://drberg-dam.imgix.net/icons/icon-line-navigation-close.svg" loading="lazy" alt="close-icon">
                     </button>
                   </section>
                   <section class="list-item">
+                    <p class="ml-5 text-sm" v-if="notFound_case" >No results found</p>
                     <p class="item-country" v-for="country in filterCountry" :key="country.code" @click.prevent="selectCountry(country)">
                       <img width="18" height="18" loading="lazy" class="mr-2 w-[18px] h-[18px]" :src="country.img" :alt="country.nameCode">
                       {{country.nameCode}} +{{country.countryCodeNumber}}
@@ -278,16 +342,19 @@ const handleRemove = (e,item) =>{
                   :id="item.property"
                   :as="item.type == 'textarea' ? 'textarea' : 'input'" 
                   :name="item.property"
-                  :class="{'input-active': formData[item.property] && !errors[item.property], 'input-error': errors[item.property] }" 
+                  :class="{'input-active': formData[item.property] && !errors[item.property], 'input-error': errors[item.property] }"
                   :type="item.type"
                   v-model="formData[item.property]"
                   placeholder=""
+                  validateOnInput
                   @focus="focusInput($event, item)"
-                  @input="changeInput($event, item)"
+                  @input="changeInput($event, item)"   
+                  @blur="blurInput($event, item)"     
+                  @keypress="item.type == 'number'?checkNumber($event):''"  
                 >
                   </v-input>
                 <label for="" class="control-title">{{item.label}} </label>
-                <span class="absolute top-5 right-[34px] remove-icon unshow" :class="item.property != 'message'?item.property:'message unshow_textarea'" @click="handleRemove($event, item)">
+                <span class="absolute top-5 right-[34px] cursor-pointer remove-icon unshow" :class="item.property != 'message'?item.property:'message unshow_textarea'" @click="handleRemove($event, item)">
                       <img class="w-[24px] h-[24px]" src="https://drberg-dam.imgix.net/icons/icon-line-navigation-close.svg" loading="lazy" alt="close-icon">
                 </span>
             </div>
@@ -301,7 +368,7 @@ const handleRemove = (e,item) =>{
           <input type="file" accept=".doc, .docx, .pages, .pdf" hidden @change="selectFile($event, 'letter')" ref="letter">
           <div v-for="(item, index) in data.attachments.anchorText" :key="`${item.value}_${index}`">
             <section class="flex gap-2 items-center mt-5">
-              <button class="attachments-btn rippleAffect" @click="chosseFile($event, item)">
+              <button class="attachments-btn rippleAffect" @click.prevent="chosseFile($event, item)">
                 <img width="18" height="18" :src="data.attachments.icon" alt="">
               </button>
               <span class="underline font-bold cursor-pointer text-xl" @click="chosseFile($event, item)">{{item.text}}</span>
@@ -345,7 +412,7 @@ const handleRemove = (e,item) =>{
         </div>
       </div>
       <div class="form-footer">
-        <button class="control-btn rippleAffect"  @click="submitForm(validate ,data.ctaLink.url)">
+        <button class="control-btn rippleAffect"  @click.prevent="handleSubmit($event,submitForm(validate ,data.ctaLink.url))">
           {{data.ctaLink.text}}
         </button>
         <div class="text-sm mt-5 mb-[60px] xmd:mb-20" v-html="data.ctaLink.description"></div>
@@ -397,7 +464,7 @@ const handleRemove = (e,item) =>{
               }
             }
             &.input-error {
-              @apply bg-error-10 hover:bg-error-10;
+              @apply bg-error-5 border-error hover:bg-error-10;
               & ~ .control-title {
                 @apply top-1 text-sm left-0 text-error;
               }
