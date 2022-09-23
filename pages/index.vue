@@ -51,20 +51,20 @@ const formatNameComponent = (name) => {
     for (var i = 0; i < name.length; i++) {
       name[i] = name[i].charAt(0).toUpperCase() + name[i].slice(1);
     }
+    return name.join("");
   } catch (e) {
     console.log(e);
   }
-  return name.join("");
 };
 const getComponent = (name) => {
   try {
     const { component } = listComponent.find(
       (c) => c.name == formatNameComponent(name)
     );
+    return component;
   } catch (e) {
     console.log(e);
   }
-  return component;
 };
 const showHideComponent = (name) => {
   try {
@@ -73,10 +73,10 @@ const showHideComponent = (name) => {
       listComponent.find((c) => c.name == nameComponent).enable = true;
       return true;
     }
+    return false;
   } catch (e) {
     console.log(e);
   }
-  return false;
 };
 </script>
 <template>
